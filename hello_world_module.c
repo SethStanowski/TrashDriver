@@ -16,10 +16,22 @@ int valueETX, arr_valueETX[4];
 char *nameETX;
 int cb_valueETX = 0;
 
-module_param(valueETX, int, S_IRUSR|S_IWUSR);                          //integer value
+// module_param() used to initialize arguments (variable name, variable type, permissions)
+//                      Read user and write user
+module_param(valueETX, int, S_IRUSR|S_IWUSR);   		       //integer value
+//                       Read user and write user
 module_param(nameETX, charp, S_IRUSR|S_IWUSR);                         //String
-module_param_array(arr_valueETX, int , NULL, S_IRUSR|S_IWUSR);	       //Array of integers
 
+
+// module_param_array() used to send an array as an argument (variable name, variable type, amount of values, permissions)
+//                                       Read user and write user
+module_param_array(arr_valueETX, int , NULL, S_IRUSR|S_IWUSR);	       //Array of integers
+// creates /sys/module/hello_world_module/parameters/{valueETX, nameETX,arr_valueETX
+
+
+
+//module_param_cb parameter callback. checks if variable is changed
+//
 /*----------------------Module_param_cb()--------------------------------*/
 int notify_param(const char *val, const struct kernel_param *kp){
 	int res = param_set_int(val, kp);  // Use helper for write variable
