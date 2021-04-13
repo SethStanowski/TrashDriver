@@ -1,1 +1,0 @@
-cmd_/home/stanowsk/Desktop/TrashDriver/device_number/static_driver/static_driver.mod := { echo  /home/stanowsk/Desktop/TrashDriver/device_number/static_driver/static_driver.o;  echo; } > /home/stanowsk/Desktop/TrashDriver/device_number/static_driver/static_driver.mod

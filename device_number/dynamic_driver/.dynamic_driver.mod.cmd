@@ -1,1 +1,0 @@
-cmd_/home/stanowsk/Desktop/TrashDriver/device_number/dynamic_driver/dynamic_driver.mod := { echo  /home/stanowsk/Desktop/TrashDriver/device_number/dynamic_driver/dynamic_driver.o;  echo; } > /home/stanowsk/Desktop/TrashDriver/device_number/dynamic_driver/dynamic_driver.mod

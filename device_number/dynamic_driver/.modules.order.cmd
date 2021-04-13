@@ -1,1 +1,0 @@
-cmd_/home/stanowsk/Desktop/TrashDriver/device_number/dynamic_driver/modules.order := {   echo /home/stanowsk/Desktop/TrashDriver/device_number/dynamic_driver/dynamic_driver.ko; :; } | awk '!x[$$0]++' - > /home/stanowsk/Desktop/TrashDriver/device_number/dynamic_driver/modules.order
