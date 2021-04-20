@@ -29,9 +29,9 @@ uint8_t *kernel_buffer;
 static int 	__init etx_driver_init(void);
 static void	__exit etx_driver_exit(void);
 static int	etx_open(struct inode *inode, struct file *file);
-static int	ext_release(struct inode *inode, struct file *file);
-static sszie_t	ext_read(struct file *filp, char __user *buf, size_t len,loff_t * off);
-static sszie_t	etx_write(struct file *filp, const char *buf, size_t len, loff_t * off);
+static int	etx_release(struct inode *inode, struct file *file);
+static ssize_t	etx_read(struct file *filp, char __user *buf, size_t len,loff_t * off);
+static ssize_t	etx_write(struct file *filp, const char *buf, size_t len, loff_t * off);
 
 /*
  * File Operations struct
@@ -60,15 +60,15 @@ static int etx_open(struct inode *inode, struct file *file) {
 /*
  * This function will becalled when we close the device file
  */
-static int etx_release(struct inode *inode, struct file *file)
-	kfree(kernel_buffer);
-	printk(kERN_INFO "devce File closed...!!!\n");
-	return 0;
-	}
+static int etx_release(struct inode *inode, struct file *file) {
+        kfree(kernel_buffer);
+        pr_info("Device File Closed...!!!\n");
+        return 0;
+}
 /* 
  * this function will be called when we read the device file
  */
-stati csszie_t etx_read(struct file *filp, char __user *buf, size_t len, loff_t *off);{
+static ssize_t etx_read(struct file *filp, char __user *buf, size_t len, loff_t *off){
 	//Copy the data from the kernel space to the user-space
 	copy_to_user(buf, kernel_buffer, mem_size);
 	printk(KERN_INFO "Data Read : Done\n");
