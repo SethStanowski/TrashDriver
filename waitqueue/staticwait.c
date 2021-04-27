@@ -54,3 +54,76 @@ static struct file_operations fop =
 	.open 		= etx_open,
 	.release	= etx_release
 }
+
+/*
+ * Thread function
+ */
+static int wait_function(void *unused) {
+	while(1) {
+		pr_info("Waiting for Event....\n");
+		wait_event_interruptible(wait_queue_etx, wait_queue_flag != 0);
+		if (wait_queue_flag == 2) {
+			pr_info("Event came from exit Function\n");
+			return 0;
+		}
+		prinfo("Event came from read function - %d\n", ++read_count);
+		wait_queue_flag = 0;
+	}
+	do_exit(0);
+	return 0;
+}
+
+/*
+ * This function will be called when we open the Device file
+ */
+static int etx_open(struct inode *inode, struct file *file) {
+	pr_info("Device file Opened...!!!\n");
+	return 0;
+}
+
+/*
+ * This function will be called when we close the Device file
+ */
+static int etx_release(struct inode *inode, struct file *file) {
+	pr_info("Device File Closed...!!!\n");
+	return 0;
+}
+
+/*
+ * This function will be called when we read teh Device file
+ */
+
+static ssize_t etx_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
+	pr_info("Read Function\n");
+	wait_queue_flag = 1;
+	wake_up_interruptible(&wait_queue_etx);
+	return 0;
+}
+
+/*
+ * This function will be called when we write the Device file
+ */
+static ssize_t etx_write(struct file *filp, const char __user *buf, size_t len, loff_t *off) {
+	pr_info("Write function \n");
+	return len;
+}
+
+/*
+ * Module Init function
+ */
+
+static int __init etx_driver_init(void) {
+	/*Allocating Major number */
+	if((alloc_chrdev_region(&dev, 0, 1, "etx_Dev")) < 0 ) {
+		pr_info("Cannot allocate major number\n");
+		return -1;
+	}
+	pr_info("Major = %d Minor = %d \n", MAJOR(dev), MINOR(dev));
+
+	/*Creating cdev structure*/
+	cdev_init(&etx_cdev,&fops);
+	etx_cdev.owner = THIS_MODULE;
+	etx_cdev.ops = &fops;
+
+	/*Adding character devie to the system */
+
