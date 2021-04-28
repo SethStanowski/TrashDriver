@@ -38,22 +38,22 @@ static int 	__init etx_driver_init(void);
 static int 	__exit ext_driver_exit(void);
 
 /******** Driver functinos *************************/
-static int 	ext_open(struct inode *inode, struct file *file);
-static int 	ext_release(struct indoe *inode, struct file *file);
-static ssize_t  ext_read(struct file *filp, char __user *buf, size_t len, loff_t * off);
-static ssize_t  ext_write(struct file *filp, const char *buf, size_t len, loff_t * off);
+static int 	etx_open(struct inode *inode, struct file *file);
+static int 	etx_release(struct inode *inode, struct file *file);
+static ssize_t  etx_read(struct file *filp, char __user *buf, size_t len, loff_t * off);
+static ssize_t  etx_write(struct file *filp, const char *buf, size_t len, loff_t * off);
 
 /*
  * File operation structure
  */
-static struct file_operations fop =
+static struct file_operations fops =
 {
 	.owner 		= THIS_MODULE,
-	.read 		= ext_read,
+	.read 		= etx_read,
 	.write 		= etx_write,
 	.open 		= etx_open,
 	.release	= etx_release
-}
+};
 
 /*
  * Thread function
@@ -66,7 +66,7 @@ static int wait_function(void *unused) {
 			pr_info("Event came from exit Function\n");
 			return 0;
 		}
-		prinfo("Event came from read function - %d\n", ++read_count);
+		pr_info("Event came from read function - %d\n", ++read_count);
 		wait_queue_flag = 0;
 	}
 	do_exit(0);
@@ -122,8 +122,64 @@ static int __init etx_driver_init(void) {
 
 	/*Creating cdev structure*/
 	cdev_init(&etx_cdev,&fops);
+
 	etx_cdev.owner = THIS_MODULE;
 	etx_cdev.ops = &fops;
 
 	/*Adding character devie to the system */
+if((cdev_add(&etx_cdev,dev,1)) < 0) {
+	pr_info("Cannot add teh device to the system\n");
+	goto r_class;
+}
 
+/*Creating struct class*/
+if((dev_class = class_create(THIS_MODULE, "etx_class")) == NULL) {
+	pr_info("Cannot create the struct class\n");
+	goto r_class;
+}
+
+/*createing device*/
+if((dev_class = class_create(THIS_MODULE, "etx_class" )) == NULL ) {
+	pr_info("Cannot create the device 1\n");
+	goto r_device;
+}
+
+/*Create the kernel thread with the name 'mythread'*/
+wait_thread = kthread_create(wait_function, NULL, "WaitThread");
+if (wait_thread) {
+	pr_info("Thread Created successfully\n");
+	wake_up_process(wait_thread);
+} else
+	pr_info("Thread creating failed\n");
+
+pr_info("Device Driver Insert...Done!!!\n");
+return 0;
+
+r_device:
+	class_destroy(dev_class);
+r_class:
+	unregister_chrdev_region(dev,1);
+	return -1;
+}
+
+/*
+** Module exit function
+*/
+static void __exit etx_driver_exit(void)
+{
+        wait_queue_flag = 2;
+        wake_up_interruptible(&wait_queue_etx);
+        device_destroy(dev_class,dev);
+        class_destroy(dev_class);
+        cdev_del(&etx_cdev);
+        unregister_chrdev_region(dev, 1);
+        pr_info("Device Driver Remove...Done!!!\n");
+}
+
+module_init(etx_driver_init);
+module_exit(etx_driver_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("EmbeTronicX <embetronicx@gmail.com>");
+MODULE_DESCRIPTION("Simple linux driver (Waitqueue Static method)");
+MODULE_VERSION("1.7");
